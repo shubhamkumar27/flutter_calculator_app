@@ -1,191 +1,201 @@
-import 'dart:math';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:loginpage/DelayAnimation.dart';
-import 'package:loginpage/MyAnimation.dart';
+import 'package:math_expressions/math_expressions.dart';
 
-// #31B8F5 #5EC8F8
-void main() => runApp(MyApp());
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+void main(){
+  runApp(Calculator());
 }
 
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+class Calculator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Calculator",
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        accentColor: Colors.deepPurpleAccent,
+      ),
+      home: SimpleCalculator(),
+    );
+  }
+}
 
-  void _donothing(){
+class SimpleCalculator extends StatefulWidget {
+  @override
+  _SimpleCalculatorState createState() => _SimpleCalculatorState();
+}
 
+class _SimpleCalculatorState extends State<SimpleCalculator> {
+
+  String equation = "0";
+  String result = "0";
+  String expression = "0";
+  double eqfontsize = 38.0;
+  double resultfontsize = 48.0;
+
+  buttonPressed(String data){
+    setState(() {
+      if (data=="C"){
+        equation = "0";
+        result = "0";
+        eqfontsize = 38.0;
+        resultfontsize = 48.0;
+      }
+      else if (data=="⌫"){
+        equation = equation.substring(0,equation.length-1);
+        if (equation==""){
+          equation = "0";
+        }
+        eqfontsize = 48.0;
+        resultfontsize = 38.0;
+      }
+      else if (data=="="){
+        eqfontsize = 38.0;
+        resultfontsize = 48.0;
+        expression = equation;
+        expression = expression.replaceAll("×", "*");
+        expression = expression.replaceAll("÷", "/");
+        try{
+          Parser p = Parser();
+          Expression exp = p.parse(expression);
+          ContextModel cm = ContextModel();
+          result = '${exp.evaluate(EvaluationType.REAL, cm)}';
+        } catch(e) {
+          result = "Error";
+        }
+      }
+      else{
+        eqfontsize = 48.0;
+        resultfontsize = 38.0;
+        if (equation=="0") {
+          equation = data;
+        }
+        else {
+          equation = equation + data;
+        }
+      }
+    });
+  }
+
+  Widget buildButtons(String text, double height, Color btncolor){
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.10 * height,
+      color: btncolor,
+      child: FlatButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5.0),
+              side: BorderSide(
+                color: Colors.white,
+                width: 1,
+                style: BorderStyle.solid,
+              )
+          ),
+          onPressed: () => buttonPressed(text),
+          padding: EdgeInsets.all(1.0),
+          child: Text(text, style: TextStyle(
+            fontSize: 30.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+          ),)
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = Colors.white;
-    return MaterialApp(
-      home : Scaffold(
-        body: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              colors: [
-                Colors.blue[900],
-                Colors.blue[800],
-                Colors.blue[400],
-              ]
-            )
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Calculator"),
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+            child: Text(equation, style: TextStyle(fontSize: eqfontsize),),
           ),
-
-          child: Column(
+          Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+            child: Text(result, style: TextStyle(fontSize: resultfontsize),),
+          ),
+          Expanded(
+            child: Divider(),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              DelayAnimation(
-              child: MyAnimation(
-                child: AvatarGlow(
-                  endRadius: 120,
-                  duration: Duration(seconds: 2),
-                  glowColor: Colors.white24,
-                  repeat: true,
-                  repeatPauseDuration: Duration(seconds: 0),
-                  startDelay: Duration(seconds: 1),
-                  child: Material(
-                    elevation: 8.0,
-                    shape:  CircleBorder(),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child : FlutterLogo(
-                        size: 70.0,
-                      ),
-                      radius: 70.0,
+              Container(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Table(
+                  children: [
+                    TableRow(
+                    children: [
+                      buildButtons("C", 1, Colors.redAccent),
+                      buildButtons("⌫", 1, Colors.black87),
+                      buildButtons("÷", 1, Colors.deepPurpleAccent),
+                      ]
                     ),
-                  ),
-                ),
-              ),
-                delay: 2000,
-              ),
-              DelayAnimation(
-                child: Container(
-                  padding: EdgeInsets.only(bottom: 20),
-                  child: Text("Welcome To Flutter World !", style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),),
-                ),
-                delay: 2500,
-              ),
-              Expanded(
-                  child: SingleChildScrollView(
-                child: DelayAnimation(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(50), topRight: Radius.circular(50))
-                  ),
-                  child: Padding(
-                      padding: EdgeInsets.all(30.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          SizedBox(height: 25,),
-                          DelayAnimation(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [BoxShadow(
-                                  color: Colors.blue,
-                                  blurRadius: 20,
-                                  offset: Offset(0,10)
-                                ),]
-                              ),
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: Colors.grey[200])),
-
-                                    ),
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        hintText: "Email or Phone number",
-                                        hintStyle: TextStyle(color: Colors.grey),
-                                        border: InputBorder.none
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: Colors.grey[200])),
-
-                                    ),
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                          hintText: "Password",
-                                          hintStyle: TextStyle(color: Colors.grey),
-                                          border: InputBorder.none
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            delay: 3000,
-                          ),
-                          SizedBox(height: 30,),
-                          Center(
-                            child: DelayAnimation(
-                              child: Text("Forget Password?", style: TextStyle(color: Colors.grey),),
-                              delay: 3000,
-                            ),
-                          ),
-                          SizedBox(height: 20,),
-                          DelayAnimation(
-                            child: Container(
-                              height: 50,
-                              margin: EdgeInsets.symmetric(horizontal: 50),
-                              child: FlatButton(
-                                color: Colors.deepOrange[700],
-                                child: Text("Login", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                onPressed: _donothing,
-                              ),
-                          ),
-                          delay: 3000,
-                          ),
-                          SizedBox(height: 10,),
-                          DelayAnimation(
-                            child: Container(
-                              height: 50,
-                              margin: EdgeInsets.symmetric(horizontal: 50),
-                              child: FlatButton(
-                                color: Colors.blue[700],
-                                child: Text("Signup", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                onPressed: _donothing,
-                              ),
-                            ),
-                            delay: 3000,
-                          ),
-                        ],
-                      ),
+                    TableRow(
+                        children: [
+                          buildButtons("7", 1, Colors.black54),
+                          buildButtons("8", 1, Colors.black54),
+                          buildButtons("9", 1, Colors.black54),
+                        ]
                     ),
-                  ),
-                  delay: 3000,
+                    TableRow(
+                        children: [
+                          buildButtons("4", 1, Colors.black54),
+                          buildButtons("5", 1, Colors.black54),
+                          buildButtons("6", 1, Colors.black54),
+                        ]
+                    ),
+                    TableRow(
+                        children: [
+                          buildButtons("1", 1, Colors.black54),
+                          buildButtons("2", 1, Colors.black54),
+                          buildButtons("3", 1, Colors.black54),
+                        ]
+                    ),
+                    TableRow(
+                        children: [
+                          buildButtons(".", 1, Colors.black54),
+                          buildButtons("0", 1, Colors.black54),
+                          buildButtons("00", 1, Colors.black54),
+                        ]
+                    ),
+                  ]
                 ),
-              )
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.25,
+                child: Table(
+                    children: [
+                      TableRow(
+                          children: [
+                            buildButtons("×", 1, Colors.deepPurpleAccent),
+                          ]
+                      ),
+                      TableRow(
+                          children: [
+                            buildButtons("-", 1, Colors.deepPurpleAccent),
+                          ]
+                      ),
+                      TableRow(
+                          children: [
+                            buildButtons("+", 1, Colors.deepPurpleAccent),
+                          ]
+                      ),
+                      TableRow(
+                          children: [
+                            buildButtons("=", 2, Colors.green),
+                          ]
+                      ),
+                    ])
               )
             ],
-          ),
-        ),
-      )
+          )
+        ],
+      ),
     );
   }
 }
